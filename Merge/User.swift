@@ -1,0 +1,35 @@
+//
+//  User.swift
+//  Merge
+//
+//  Created by Johnny Perkins on 2/26/23.
+//
+import Firebase
+import FirebaseFirestoreSwift
+
+struct User: Identifiable, Decodable {
+    @DocumentID var id: String?
+    let username: String
+    let fullname: String
+    let profileImageUrl: String
+    let email: String
+    var keywordsForLookup: [String] {
+        [self.fullname.generateStringSequence(), self.username.generateStringSequence()].flatMap { $0 }
+    }
+    
+    var isCurrentUser: Bool {
+        return Auth.auth().currentUser?.uid == id
+    }
+}
+
+extension String {
+    func generateStringSequence() -> [String] {
+        
+        guard self.count > 0 else {return [] }
+        var sequences: [String] = []
+        for i in 1...self.count {
+            sequences.append(String(self.prefix(i)))
+        }
+        return sequences
+    }
+}
