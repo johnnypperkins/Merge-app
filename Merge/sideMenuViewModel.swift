@@ -18,7 +18,7 @@ enum sideMenuViewModel: Int, CaseIterable {
         switch self {
             case .bars: return "Bars"
             case .restaurants: return "Merge"
-            case .activites: return "Activites"
+            case .activites: return "Contribute"
             case .settings: return "Settings"
         }
     }
@@ -27,8 +27,8 @@ enum sideMenuViewModel: Int, CaseIterable {
     var imageName: String {
         switch self {
             case .bars: return "figure.socialdance"
-            case .restaurants: return "fork.knife"
-            case .activites: return "figure.run.circle"
+            case .restaurants: return "link"
+            case .activites: return "square.and.pencil"
             case .settings: return "gearshape"
         }
     }

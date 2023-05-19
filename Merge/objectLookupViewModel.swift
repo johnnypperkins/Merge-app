@@ -29,8 +29,10 @@ class objectLookupViewModel: ObservableObject {
                             if let address = data["Address"] as? String,
                                let name = data["Name"] as? String,
                                 let likes = data["Likes"] as? Int,
-                                let crowd = data["Crowd"] as? Int {
-                                let newPlace = Place(name: name, likes: likes, crowd: crowd, address: address)
+                                let crowd = data["Crowd"] as? Int,
+                                let imageURL = data["ImageURL"] as? String,
+                                let city = data["City"] as? String {
+                                let newPlace = Place(name: name, likes: likes, crowd: crowd, address: address, imageURL: imageURL, city: city)
                                 self.places1.append(newPlace)
                                 print(self.places1)
                             }

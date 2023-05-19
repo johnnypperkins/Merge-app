@@ -17,7 +17,7 @@ class ProfileViewModel: ObservableObject {
     @Published var isFollow: Bool = false
     @Published var followerCount: Int = 0
     
-    let user: User
+    @Published var user: User
     
     init(user: User) {
         //self.getCountOfStringsInArrayField(user1: user)
@@ -149,6 +149,30 @@ class ProfileViewModel: ObservableObject {
             }
                 
             }
+        }
+    
+        private let db = Firestore.firestore()
+        private var counterListener: ListenerRegistration?
+        
+        func startListening() {
+            let counterRef = db.collection("users").document(user.id!)
+            counterListener = counterRef.addSnapshotListener { documentSnapshot, error in
+                guard let document = documentSnapshot else {
+                    print("Error fetching document: \(error!)")
+                    return
+                }
+                guard document.data() != nil else {
+                    print("Document data was empty.")
+                    return
+                }
+                guard let userUpdated = try? documentSnapshot!.data(as: User.self) else { return }
+                    self.user = userUpdated
+                
+            }
+        }
+        
+        func stopListening() {
+            counterListener?.remove()
         }
     }
   /*  func fetchLikedTweets() {

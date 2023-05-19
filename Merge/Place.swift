@@ -13,6 +13,8 @@ struct Place: Identifiable, Decodable {
     var likes: Int
     var crowd: Int
     var address: String
+    var imageURL: String
+    var city: String
     
     var didLike: Bool? = false
 }

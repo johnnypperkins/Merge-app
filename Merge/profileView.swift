@@ -40,7 +40,7 @@ struct profileView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .padding(.bottom,0.5)
-                        Text("Wake Forest University")
+                        Text(viewModel.user.college)
                         KFImage(URL(string: viewModel.user.profileImageUrl))
                             .resizable()
                             .frame(width: 200,height: 200)
@@ -48,7 +48,7 @@ struct profileView: View {
                             .padding(.top,25)
                         if viewModel.user.isCurrentUser == true {
                             NavigationLink {
-                                editProfileView()
+                                editProfileView(user1: viewModel.user)
                             } label: {
                                 Text("Edit")
                                     .foregroundColor(Color("Color 1"))
@@ -145,10 +145,14 @@ struct profileView: View {
                     )
                 }
             }
+        }.onAppear {
+            viewModel.startListening()
+        }
+        .onDisappear {
+            viewModel.stopListening()
         }
     }
     }
-    //}
 
     
     /*struct profileView_Previews: PreviewProvider {

@@ -41,7 +41,7 @@ struct sideMenuHeaderView: View {
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundColor(.white)
                     
-                    Text("@Wake Forest University")
+                    Text("@\(user.college)")
                         .font(.system(size: 14))
                         .padding(.bottom,12)
                         .foregroundColor(.white)

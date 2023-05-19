@@ -32,7 +32,7 @@ struct sideMenuView: View {
         switch name {
         case "Bars": Text("Bars")
         case "Merge": connectView()
-        case "Activities": Text("Activities")
+        case "Contribute": contributeScreen()
         case "Settings": settingsView()
         default: EmptyView()
         }

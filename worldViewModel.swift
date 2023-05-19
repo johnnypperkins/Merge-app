@@ -13,7 +13,7 @@ import FirebaseFirestoreSwift
 class worldViewModel: ObservableObject {
     @Published var queriedCities: [String] = []
     private let db = Firestore.firestore()
-    var city = "Athens"
+    var city = "San Francisco"
 
     init() {
         setCity(location: city)

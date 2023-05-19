@@ -13,12 +13,15 @@ import Firebase
 class homeScreenViewModel: ObservableObject {
     @Published var success = false
     let backend = commentService()
-    @Published var places = [Place]()
+    var places = [Place]()
     @Published var city: String
+    @Published var queriedCities: [String] = []
     
     init(city1: String) {
         self.city = city1
-        loadPlaces(location: city1)
+        //loadPlaces(location: city1)
+        setCity(location: city)
+        fetchCities()
     }
     
     func loadPlaces (location: String) {
@@ -39,8 +42,10 @@ class homeScreenViewModel: ObservableObject {
                             if let address = data["Address"] as? String,
                                let name = data["Name"] as? String,
                                let likes = data["Likes"] as? Int,
-                               let crowd = data["Crowd"] as? Int {
-                                var newPlace = Place(name: name, likes: likes, crowd: crowd, address: address)
+                               let crowd = data["Crowd"] as? Int,
+                               let imageURL = data["ImageURL"] as? String,
+                                let city = data["City"] as? String {
+                                var newPlace = Place(name: name, likes: likes, crowd: crowd, address: address, imageURL: imageURL, city: city)
                                 Task {await checkDocument(newPlace: newPlace) { success in
                                     print("\(success) s s ss s s")
                                     newPlace.didLike = success
@@ -69,4 +74,23 @@ class homeScreenViewModel: ObservableObject {
                 }
             }
         }
+
+    func setCity(location: String) {
+        self.city = location
+        loadPlaces(location: location)
+    }
+    
+    func fetchCities() {
+        let db = Firestore.firestore()
+        db.collection("Activities").document("Bars")
+        .getDocument { (document, error) in
+            if let document = document {
+                let data = document.data()
+                let group_array = data?["Cities"] as? [String] ?? [""]
+                print(group_array)
+                self.queriedCities = group_array
+                
+        }
+        }
+    }
 }

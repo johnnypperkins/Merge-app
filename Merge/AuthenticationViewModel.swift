@@ -37,9 +37,12 @@ class AuthenticationViewModel: ObservableObject {
     @Published var displayName: String = ""
     @Published var name: String = ""
     private var tempUserSession: FirebaseAuth.User?
-    @Published var userSession : FirebaseAuth.User?
+    @Published var userSession : FirebaseAuth.User? = nil
     private let service = userService()
     @Published var currUser: User?
+    private let db = Firestore.firestore()
+        private var userListener: ListenerRegistration?
+    @Published var currentUser1: User?
     
         
     init() {
@@ -90,6 +93,7 @@ class AuthenticationViewModel: ObservableObject {
             await wait()
             do {
                 let authResult = try await Auth.auth().signIn(withEmail: email, password: password)
+                
                 user = authResult.user
                 userSession = user
                 self.fetchUser()
@@ -129,7 +133,7 @@ class AuthenticationViewModel: ObservableObject {
                     .setData(data) { _ in
                         print("did upload user data")
                     }
-                var user = User(username: displayName.lowercased(), fullname: name, profileImageUrl: "", email: email)
+                var user = User(username: displayName.lowercased(), fullname: name, profileImageUrl: "", email: email, college: "")
                 try await Firestore.firestore().collection("users").document(authResult.user.uid).updateData(["keywordsForLookup": user.keywordsForLookup])
                 //displayName = user?.email ?? "(unknown)"
                 
@@ -145,12 +149,22 @@ class AuthenticationViewModel: ObservableObject {
         
         func signOut() {
             authenticationState = .unauthenticated
+            //userSession = nil
             try? Auth.auth().signOut()
         }
         
         func deleteAccount() async -> Bool {
             authenticationState = .unauthenticated
+            Task {
+                try await Auth.auth().currentUser?.delete()
+            }
             return true
+        }
+        
+        func resetPassword() {
+            Auth.auth().sendPasswordReset(withEmail: email) { error in
+              
+            }
         }
         
         func uploadProfileImage(_ image: UIImage) {
@@ -168,11 +182,54 @@ class AuthenticationViewModel: ObservableObject {
             }
             
         }
+        
+        func uploadCollegeName(name: String) {
+            print("entered1")
+            guard let uid = Auth.auth().currentUser else {return }
+                Firestore.firestore().collection("users").document(uid.uid).updateData(["college": name]) { _ in
+                    self.userSession = self.tempUserSession
+                
+            }
+            
+        }
+        
         func fetchUser() {
                 guard let uid = self.userSession?.uid else { return }
                 
                 service.fetchUser(withUid: uid) { user in
+                    print("HHHHHHHHH")
+                    print(user)
                     self.currUser = user
+                }
+            }
+        
+        func startListening() {
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                
+                let userRef = db.collection("users").document(uid)
+                userListener = userRef.addSnapshotListener { documentSnapshot, error in
+                    guard let document = documentSnapshot else {
+                        print("Error fetching document: \(error!)")
+                        return
+                    }
+                    guard let data = document.data() else {
+                        print("Document data was empty.")
+                        return
+                    }
+                    // Update user info in view model, if needed
+                }
+            }
+            
+            func stopListening() {
+                userListener?.remove()
+            }
+            
+            func setCurrentUser(user: User?) {
+                currentUser1 = user
+                if user != nil {
+                    startListening()
+                } else {
+                    stopListening()
                 }
             }
         

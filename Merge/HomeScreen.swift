@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseFirestore
+import Kingfisher
 
 struct per {
     static var butColor: Bool = false
@@ -22,11 +23,11 @@ struct HomeScreen: View {
     private let db = Firestore.firestore()
   //  @State var city: String
     @ObservedObject var viewModelHome: homeScreenViewModel
-    @ObservedObject var cityViewModel: worldViewModel
+    //@ObservedObject var cityViewModel: worldViewModel
     
-    init(viewModelHome: homeScreenViewModel, cityViewModel: worldViewModel) {
-        self.viewModelHome = homeScreenViewModel(city1: cityViewModel.city)
-        self.cityViewModel = cityViewModel
+    init(viewModelHome: homeScreenViewModel/*, cityViewModel: worldViewModel*/) {
+        self.viewModelHome = viewModelHome
+       // self.cityViewModel = cityViewModel
     }
     
     var body: some View {
@@ -75,14 +76,14 @@ struct HomeScreen: View {
                 
             }
             
-        }
+        }.onAppear()
     }
  
 }
 
 struct HomeScreen_Previews: PreviewProvider {
     static var previews: some View {
-        HomeScreen(viewModelHome: homeScreenViewModel(city1: ""), cityViewModel: worldViewModel())
+        HomeScreen(viewModelHome: homeScreenViewModel(city1: "")/*, cityViewModel: worldViewModel()*/)
     }
 }
 
@@ -133,7 +134,7 @@ struct Post: View {
             Divider()
             
             HStack{
-                Image(image)
+                KFImage(URL(string: viewModel1.place1.imageURL))
                     .resizable()
                     .frame(width: 110,height: 110)
                     .cornerRadius(20)
@@ -168,12 +169,12 @@ struct Post: View {
                              but1.butColor.toggle();
                              }
                              */
-                            didLike ? viewModel1.unlike() : viewModel1.like(city: viewModel.city)
+                            didLike ? viewModel1.unlike(city: viewModel.city) : viewModel1.like(city: viewModel.city)
                         },label: {
                             Image(systemName: "flame")
                                 .resizable()
                                 .frame(width: 30, height: 30)
-                                .foregroundColor(didLike ? Color("Color 1"): .red)
+                                .foregroundColor(viewModel1.liked ? .red : .blue)
                                 .padding(.trailing,20)
                             
                         })

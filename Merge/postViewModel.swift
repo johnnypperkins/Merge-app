@@ -13,6 +13,7 @@ import FirebaseFirestore
 
 class postViewModel: ObservableObject {
     var place1: Place
+    @Published var liked: Bool = false
     
     init(place1: Place) {
         self.place1 = place1
@@ -28,12 +29,23 @@ class postViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         self.place1.didLike = true // Update the didLike property
                         self.place1.likes += 1
+                        self.liked = true
                     }
                 }
             }
         }
-    func unlike() {
-        
+    func unlike(city: String) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let db = Firestore.firestore()
+        db.collection("Activities").document("Bars").collection(city).document(place1.name).updateData(["Likes": FieldValue.increment(Int64(1))]) { _ in
+            db.collection("users").document(uid).collection("likedPlaces").document(self.place1.name).setData([:]) { _ in
+                DispatchQueue.main.async {
+                    self.place1.didLike = false // Update the didLike property
+                    self.place1.likes -= 1
+                    self.liked = false
+                }
+            }
+        }
     }
     
     func checkDocument() -> Bool  {

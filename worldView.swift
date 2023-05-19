@@ -10,12 +10,10 @@ import SwiftUI
 struct worldView: View {
     
     @State private var isShowing = false
-    @StateObject var viewModel2 = worldViewModel()
-    @ObservedObject var viewModelHome: homeScreenViewModel
+    //@StateObject var viewModel2 = worldViewModel()
+    @StateObject var viewModelHome = homeScreenViewModel(city1: "Athens")
     
-    init() {
-        self.viewModelHome = homeScreenViewModel(city1: "Athens")
-    }
+   
     
     var body: some View {
         NavigationView {
@@ -51,10 +49,10 @@ struct worldView: View {
                             HStack {
                                 
                                 Menu {
-                                    ForEach(viewModel2.queriedCities, id: \.self) { city in
+                                    ForEach(viewModelHome.queriedCities, id: \.self) { city in
                                         Button(action: {
-                                            viewModel2.setCity(location: city)
-                                            viewModelHome.loadPlaces(location: city)
+                                            viewModelHome.setCity(location: city)
+                                            //viewModelHome.loadPlaces(location: city)
                                         }, label: {
                                             Text(city)
                                         })
@@ -77,23 +75,24 @@ struct worldView: View {
                     .padding(.top, -10)
                     .padding(.horizontal)
                     
-                    TabBar(viewModel: viewModel2, viewModelHome: viewModelHome)
+                    TabBar( viewModelHome: viewModelHome)
                         .cornerRadius(isShowing ? 50 : 30)
                         .blur(radius: isShowing ? 8 : 0)
                         .offset(x:isShowing ? 300 : 0, y: isShowing ? 100 : 0)
                         .scaleEffect(isShowing ? 0.8 : 1)
                         .navigationBarTitleDisplayMode(.inline)
-                }
+                }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
                   
             }
-            .frame(maxWidth: .infinity,maxHeight: .infinity)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
+            .edgesIgnoringSafeArea(.bottom)
         }.navigationBarBackButtonHidden(true)
             .onAppear{
-                viewModelHome.loadPlaces(location: "Athens")
+               
             }
             .navigationViewStyle(StackNavigationViewStyle())
     }
-    
+
 }
 
 
@@ -103,14 +102,11 @@ struct worldView_Previews: PreviewProvider {
     }
 }
 
-extension worldView {
-    
-}
 
 struct TabBar: View {
-    @ObservedObject var authViewModel = AuthenticationViewModel()
+    @StateObject var authViewModel = AuthenticationViewModel()
     
-    @ObservedObject var viewModel: worldViewModel
+   // @ObservedObject var viewModel: worldViewModel
     
     @ObservedObject var viewModelHome: homeScreenViewModel
     
@@ -120,25 +116,28 @@ struct TabBar: View {
                 if let user = authViewModel.currUser {
                     friendComments()
                         .tabItem {
-                            Image(systemName: "mappin")
+                            Image(systemName: "mappin").padding(.top)
                         }
-                    HomeScreen(viewModelHome: viewModelHome, cityViewModel: viewModel)
+                    HomeScreen(viewModelHome: viewModelHome/*, cityViewModel: viewModel*/)
                         .tabItem {
                             Image(systemName: "globe.europe.africa")
+                                .padding(.top)
                         }
                     profileView(user: user)
                         .tabItem {
                             Image(systemName: "person.crop.square")
+                                .padding(.top)
                         }
                     
                 } else{
                     EmptyView()
                 }
             }
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center).ignoresSafeArea(.all)
             .toolbarColorScheme(.dark, for: .tabBar)
         }.navigationBarBackButtonHidden(true)
         .ignoresSafeArea(.all)
-        .frame(maxWidth: .infinity,maxHeight: .infinity)
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
     }
 }
 

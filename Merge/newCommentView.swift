@@ -19,7 +19,7 @@ struct newCommentView: View {
     var body: some View {
         VStack{
             HStack{
-                Button(action: {presentationMode.wrappedValue.dismiss()
+                Button(action: {/*presentationMode.wrappedValue.dismiss()*/
                 }, label: {
                     Image(systemName: "xmark")
                         .resizable()

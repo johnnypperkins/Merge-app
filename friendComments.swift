@@ -24,15 +24,35 @@ struct friendComments: View {
             
             commentHeader()
             Divider()
-            ScrollView(.vertical,showsIndicators: false) {
-                ForEach(viewmodel.arrrayComments) {comment in
-                    NavigationLink(destination: {}, label: {
-                        comments(comment:comment)
-                    })
+            if viewmodel.arrrayComments.isEmpty == true{
+                VStack{
+                    Text("Merge with friends! Click below")
+                        .font(.title)
+                        .foregroundColor(Color("Color 3"))
+                    NavigationLink {
+                        connectView()
+                    } label: {
+                        Image("MergeCircle")
+                            .resizable().aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                            .padding()
+                    }
+
                 }
-            }.refreshable {
-                viewmodel.importCommentsFromFollowedUsers()
+
             }
+            else {
+                ScrollView(.vertical,showsIndicators: false) {
+                    ForEach(viewmodel.arrrayComments) {comment in
+                        NavigationLink(destination: {}, label: {
+                            comments(comment:comment)
+                        })
+                    }
+                }.refreshable {
+                    viewmodel.importCommentsFromFollowedUsers()
+                }
+            }
+            Spacer()
         }
         //.onAppear {
          //   viewmodel.importCommentsFromFollowedUsers()

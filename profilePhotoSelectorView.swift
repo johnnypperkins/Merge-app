@@ -13,32 +13,66 @@ struct profilePhotoSelectorView: View {
     @State private var selectedImage: UIImage?
     @State private var profileImage: Image?
     @EnvironmentObject var viewModel: AuthenticationViewModel
+    @State private var collegeName: String = ""
     
     var body: some View {
         NavigationView{
             VStack {
+                
+                Text("Fill out your Profile!")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Color 3"))
+                    .padding()
+                
+                Text("Choose your profile photo")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Color 3"))
+                    .padding(.top)
+            
                 Button(action: {
                     showImagePicker.toggle()
                 }, label: {
                     if let profileImage = profileImage {
                         profileImage
                             .resizable()
-                            .modifier(ProfileImageModifier())
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
                     }
                     else {
                         Image(systemName: "photo.circle")
-                            .modifier(ProfileImageModifier())
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                            .foregroundColor(Color("Color 3"))
                     }
                 })
                 .sheet(isPresented: $showImagePicker,
                        onDismiss: loadImage) {
                     imagePicker(selectedImage: $selectedImage)
                 }
-                       .padding(.top,44)
+                       .padding(.top)
+                       .padding(.bottom)
                 
+                //Spacer()
+                Text("Enter your college/university")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Color 3"))
+                    .padding(.top)
+                
+                TextField("College Name", text: $collegeName)
+                                .padding()
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(8)
+                                .padding(.horizontal)
+                                .autocapitalization(.words)
                 Spacer()
                 
-                if let selectedImage = selectedImage {
+                if collegeName != "", let selectedImage = selectedImage  {
                     NavigationLink(destination: {
                         worldView() },label: {
                             Text("Welcome, click to continue")
@@ -53,12 +87,16 @@ struct profilePhotoSelectorView: View {
                     })
                     .simultaneousGesture(TapGesture().onEnded{
                         viewModel.uploadProfileImage(selectedImage)
+                        viewModel.uploadCollegeName(name: collegeName)
                         Task{
                             await wait()
                         }
-                    })
+                    }).disabled(collegeName.isEmpty)
                 }
-            }
+                
+                Spacer()
+                
+            }.navigationBarBackButtonHidden(true)
         }
     }
     

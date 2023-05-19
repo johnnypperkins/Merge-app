@@ -13,6 +13,7 @@ struct connectView: View {
     @StateObject var userLookup = usersLookupViewModel()
     @State var keyword: String = ""
     @State private var zRotateAnimation = false
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         let keywordBinding = Binding<String> (
@@ -24,8 +25,23 @@ struct connectView: View {
                 userLookup.fetchUser(from: keyword)
             }
         )
-        
         VStack {
+            HStack {
+                Button {
+                    // 2
+                    dismiss()
+                    
+                } label: {
+                    HStack {
+                        Image(systemName: "arrowshape.backward.fill")
+                            .resizable()
+                            .foregroundColor(Color("Color 1"))
+                            .padding(.leading)
+                            .frame(width: 40,height: 17)
+                    }
+                }
+                Spacer()
+            }
             HStack{
                 
             }
@@ -61,6 +77,7 @@ struct connectView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationBarBackButtonHidden(true)
     }
 }
 

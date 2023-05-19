@@ -9,26 +9,34 @@ import SwiftUI
 import FirebaseAnalyticsSwift
 
 struct ContentView: View {
-    @EnvironmentObject var viewModel: AuthenticationViewModel
+    @StateObject var viewModel = AuthenticationViewModel()
     
     var body: some View {
-            ZStack {
-                
-                
-                Home()
-                
-                
+        VStack{
+            if viewModel.authenticationState == .authenticated{
+                worldView()
             }
-            .analyticsScreen(name: "\(ContentView.self)")
-            .ignoresSafeArea()
+            else {
+                ZStack {
+                    
+                    
+                    Home()
+                    
+                    
+                }
+                .analyticsScreen(name: "\(ContentView.self)")
+                .ignoresSafeArea()
+            }
+            
+        }.navigationBarBackButtonHidden(true)
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+  //  static var previews: some View {
+  //      ContentView()
+ //   }
+//}
 
 struct Home: View {
     @EnvironmentObject var viewModel: AuthenticationViewModel
@@ -306,6 +314,10 @@ struct LoginView : View {
     @FocusState private var focus: FocusableField?
     @EnvironmentObject var viewModel: AuthenticationViewModel
     @State var success : Bool = false
+    @State private var isShowingPasswordReset = false
+    @State private var email: String = ""
+    @State private var showingAlert = true
+    //@ObservedObject var viewModel1 = PasswordResetViewModel()
     
     private func signInWithEmailPassword() {
         Task {
@@ -379,15 +391,19 @@ struct LoginView : View {
                 HStack{
                     Spacer(minLength: 0)
                     
-                    Button(action: {
-                        
-                    }){
+                    Button {
+                        isShowingPasswordReset.toggle()
+                    } label: {
                         Text("Forget Password?")
                             .foregroundColor(Color.white.opacity(0.6))
                     }
+
                 }
                 .padding(.horizontal)
                 .padding(.top,30)
+            }
+            .sheet(isPresented: $isShowingPasswordReset){
+                PasswordResetView()
             }
             .padding()
             
