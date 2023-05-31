@@ -12,11 +12,16 @@ struct profilePhotoSelectorView: View {
     @State private var showImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var profileImage: Image?
-    @EnvironmentObject var viewModel: AuthenticationViewModel
+    @ObservedObject var viewModel: AuthenticationViewModel
     @State private var collegeName: String = ""
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    
+    init(model: AuthenticationViewModel) {
+        viewModel = model
+    }
     
     var body: some View {
-        NavigationView{
+        NavigationStack{
             VStack {
                 
                 Text("Fill out your Profile!")
@@ -52,7 +57,7 @@ struct profilePhotoSelectorView: View {
                 })
                 .sheet(isPresented: $showImagePicker,
                        onDismiss: loadImage) {
-                    imagePicker(selectedImage: $selectedImage)
+                    imagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary)
                 }
                        .padding(.top)
                        .padding(.bottom)
@@ -74,7 +79,7 @@ struct profilePhotoSelectorView: View {
                 
                 if collegeName != "", let selectedImage = selectedImage  {
                     NavigationLink(destination: {
-                        worldView() },label: {
+                        TermsAndConditionsView() },label: {
                             Text("Welcome, click to continue")
                                 .foregroundColor(Color("Color 1"))
                                 .fontWeight(.bold)
@@ -124,10 +129,10 @@ private struct ProfileImageModifier: ViewModifier {
     }
 }
 
-struct profilePhotoSelectorView_Previews: PreviewProvider {
+/*struct profilePhotoSelectorView_Previews: PreviewProvider {
     static var previews: some View {
         profilePhotoSelectorView()
     }
 }
-
+*/
 

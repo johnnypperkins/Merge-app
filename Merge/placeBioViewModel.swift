@@ -30,12 +30,36 @@
  }
  
      func getComments(place: Place) {
-         backend.getComments(location: place.name) { comments in
-            self.locationComments.removeAll()
-            self.locationComments = comments
-             print(comments)
-        }
+         Firestore.firestore().collection("comments")
+             .whereField("commentLocation", isEqualTo: place.name)
+             .order(by: "timestamp", descending: true)
+             .addSnapshotListener { (snapshot, error) in
+                 if let error = error {
+                     print("There was an issue retrieving data from Firestore: \(error)")
+                     return
+                 }
+                 
+                 var comments: [Comment] = []
+                 
+                 if let snapshotDocuments = snapshot?.documents {
+                     for doc in snapshotDocuments {
+                         let data = doc.data()
+                         if let uid = data["uid"] as? String,
+                            let timestamp = data["timestamp"] as? Timestamp,
+                            let text = data["text"] as? String,
+                            let commentLocation = data["commentLocation"] as? String,
+                            let commentImageURL = data["commentImageURL"] as? String {
+                             let newComment = Comment(id: doc.documentID, uid: uid, text: text, commentImageURl: commentImageURL, commentLocation: commentLocation, timestamp: timestamp)
+                             comments.append(newComment)
+                         }
+                     }
+                 }
+                 
+                 self.locationComments = comments
+                 print(comments)
+             }
      }
+     
      
      func uploadSliderValue(value: Double, slider: String) {
          let db = Firestore.firestore().collection("Activities").document("Bars").collection(bar.city).document(bar.name)

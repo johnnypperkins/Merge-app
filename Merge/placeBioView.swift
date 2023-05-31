@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Kingfisher
+import Firebase
 
 
 struct placeBioView: View {
@@ -64,31 +65,31 @@ struct placeBioView: View {
                             .foregroundColor(.gray)
                             .padding(.top, 2)
                         
-                        Spacer()
+                        //Spacer()
                     }.padding(.horizontal)
                     VStack{
                         HStack {
                             VStack{
                                 Text("Rating")
                                     .bold()
-                                Text(String(place.crowd))
-                                    .font(.title)
+                                Text(String(format: "%.1f", viewModel.ratingAverageValue))
+                                    .font(.subheadline)
                                     .fontWeight(.bold)
                             }
                             Spacer()
                             VStack{
                                 Text("Crowd")
                                     .bold()
-                                Text(String(place.crowd))
-                                    .font(.title)
+                                Text(String(format: "%.1f", viewModel.crowdAverageValue))
+                                    .font(.subheadline)
                                     .fontWeight(.bold)
                             }
                             Spacer()
                             VStack{
                                 Text("Wait Time")
                                     .bold()
-                                Text(String(place.crowd))
-                                    .font(.title)
+                                Text(String(format: "%.1f", viewModel.waitAverageValue))
+                                    .font(.subheadline)
                                     .fontWeight(.bold)
                             }
                         }
@@ -103,7 +104,7 @@ struct placeBioView: View {
                             }
                                 .accentColor(Color("Color 2"))
                                 
-                            Text(String(format: "%.1f", viewModel.ratingAverageValue))
+                            Text(String(format: "%.1f", userRating))
                                 .font(.headline)
                         }
                         HStack {
@@ -116,7 +117,7 @@ struct placeBioView: View {
                             }
                                 .accentColor(Color("Color 2"))
                                 
-                            Text(String(format: "%.1f", viewModel.crowdAverageValue))
+                            Text(String(format: "%.1f", crowdLevel))
                                 .font(.headline)
                         }
                         HStack {
@@ -130,7 +131,7 @@ struct placeBioView: View {
                             }
                                 .accentColor(Color("Color 2"))
                                 
-                            Text(String(format: "%.1f", viewModel.waitAverageValue))
+                            Text(String(format: "%.1f", waitTime))
                                 .font(.headline)
                         }
                         Divider()
@@ -138,15 +139,16 @@ struct placeBioView: View {
                     VStack{
                         HStack {
                             Spacer()
-                            Text("Most Recent Reviews")
+                            Text("Recently @\(place.name)")
                                 .font(.headline)
                             Spacer()
                         }
+                        Divider()
                         .padding(.top, 10)
                         
-                        ForEach(viewModel.locationComments) { comment in
+                        ForEach(viewModel.locationComments, id: \.id) { comment in
                             anonyCommentView(comment: comment)
-                                .padding()
+                               // .padding()
                             Divider()
                         }
                     }
@@ -174,8 +176,8 @@ struct placeBioView: View {
             }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
                 .onAppear(perform: viewModel.deleteOldDocuments)
                 .overlay(
-                    NavigationLink(destination: {
-                        newCommentView(location: place.name)
+                    Button(action: {
+                        showSheet.toggle()
                     }, label: {
                         Image(systemName: "scribble.variable")
                             .font(.system(size: 20, weight: .semibold))
@@ -191,7 +193,9 @@ struct placeBioView: View {
                     .opacity(-scrollViewOffset >= 0 ? 1 : 0)
                     .animation(.easeInOut, value: 4)
                     ,alignment: .bottomTrailing)
-            }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
+        }.sheet(isPresented: $showSheet, content: {
+            newCommentView(location: place.name)
+        }).frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)
             .navigationBarBackButtonHidden(true)
             //.padding(.horizontal, 20)
         }
@@ -200,6 +204,8 @@ struct placeBioView: View {
 struct anonyCommentView: View {
     
     var comment: Comment
+    @State var isPresented = false
+    @State private var flagged = false
     
     var body: some View {
         HStack{
@@ -209,11 +215,48 @@ struct anonyCommentView: View {
                // .cornerRadius(50)
             
             VStack{
-                Divider()
-                Text("Anonymous commented @" + comment.commentLocation)
-                    .font(.custom("AmericanTypewriter-Semibold", fixedSize: 24))
-                    .fontWeight(.bold)
-                    .frame(alignment: .leading)
+                /*HStack{
+                    Text("@" + comment.commentLocation)
+                        .font(.system(size: 24))
+                        .fontWeight(.bold)
+                        .frame(alignment: .leading)
+                }*/
+                HStack{
+                    if let timestamp = comment.timestamp.dateValue(), let timeAgo = timeAgo(from: timestamp), let hoursAgo = hoursAgo(from: timestamp) {
+                        if hoursAgo < 24 {
+                            Text("@\(hoursAgo) hours ago" )
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                                .padding(.top, 2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                        }
+                        else {
+                            Text(timeAgo)
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                                .padding(.top, 2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    if !flagged {
+                        Button(action: {
+                            isPresented.toggle()
+                            flagged.toggle()
+                        }) {
+                            Image(systemName: "flag")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                                .foregroundColor(Color("Color 3"))
+                        }
+                    } else {
+                        Image(systemName: "flag.fill")
+                            .resizable()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(Color("Color 3"))
+                    }
+                }.padding(.bottom, 1)
+                    .padding(.horizontal)
                 
                 if comment.commentImageURl != "" {
                     KFImage(URL(string: comment.commentImageURl))
@@ -225,17 +268,39 @@ struct anonyCommentView: View {
                 }
                 HStack{
                     Text(comment.text)
-                        .font(.custom("AmericanTypewriter", fixedSize: 20))
+                        .font(.system(size: 24))
                         .padding(.top, 2)
-                        .frame(alignment: .leading)
-                }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }.padding(.horizontal)
             }
+            .sheet(isPresented: $isPresented, content: {
+                reportComment(comment: comment)
+            })
             .frame(alignment: .leading)
             
             
         }
-        .padding(.horizontal,5)
+        //.padding(.horizontal)
         .padding(.vertical, 1)
+    }
+    func timeAgo(from timestamp: Date) -> String? {
+        let calendar = Calendar.current
+        let currentDate = Date()
+        let components = calendar.dateComponents([.day, .hour], from: timestamp, to: currentDate)
+        
+        if let days = components.day, days > 0 {
+            return "\(days) day\(days == 1 ? "" : "s") ago"
+        } else if let hours = components.hour, hours > 0 {
+            return "\(hours) hour\(hours == 1 ? "" : "s") ago"
+        } else {
+            return nil
+        }
+    }
+    func hoursAgo(from timestamp: Date) -> Int? {
+        let calendar = Calendar.current
+        let currentDate = Date()
+        let components = calendar.dateComponents([.hour], from: timestamp, to: currentDate)
+        return components.hour
     }
 }
 

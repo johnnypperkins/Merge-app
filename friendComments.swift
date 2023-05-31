@@ -26,16 +26,17 @@ struct friendComments: View {
             Divider()
             if viewmodel.arrrayComments.isEmpty == true{
                 VStack{
-                    Text("Merge with friends! Click below")
+                    Text("Merge with friends!")
                         .font(.title)
                         .foregroundColor(Color("Color 3"))
                     NavigationLink {
                         connectView()
                     } label: {
-                        Image("MergeCircle")
+                        Image(systemName: "person.crop.circle.badge.plus.fill")
                             .resizable().aspectRatio(contentMode: .fit)
                             .frame(width: 100, height: 100)
                             .padding()
+                            .foregroundColor(Color("Color 2"))
                     }
 
                 }

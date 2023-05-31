@@ -11,6 +11,7 @@ import FirebaseAnalyticsSwift
 struct ContentView: View {
     @StateObject var viewModel = AuthenticationViewModel()
     
+    
     var body: some View {
         VStack{
             if viewModel.authenticationState == .authenticated{
@@ -46,16 +47,16 @@ struct Home: View {
     @State var index1 = 0
     
     var body: some View {
-        NavigationView{
+        NavigationStack{
         GeometryReader{ _ in
             
                 VStack{
                     Image("Logo")
                         .resizable()
                         .frame(width:120 , height: 120)
-                        .padding(.top,100)
+                        .padding(.top,70)
                     
-                    ZStack{
+                    ZStack(alignment: .top){
                         
                         SignUP(index: self.$index, index1: self.$index1)
                         //changing view order
@@ -66,7 +67,7 @@ struct Home: View {
                         
                         
                     }
-                    
+                    Spacer()
                 
                     
                     //because login button is moved 25 in y axis and 25  padding = 5
@@ -142,12 +143,13 @@ struct SignUP : View {
                     
                     Spacer(minLength: 0)
                     
-                    VStack(spacing:10){
+                    VStack(spacing: 10){
                         
                         Text("SignUp")
                             .foregroundColor(self.index == 1 ? .white : .gray)
                             .font(.title)
                             .fontWeight(.bold)
+                            .frame(alignment: .top)
                         
                         Capsule()
                             .fill(self.index == 1 ? Color.blue : Color.clear)
@@ -156,15 +158,19 @@ struct SignUP : View {
                     
                     
                 }
-                .padding(.top,30)
+                .padding(.top,20)
                 
                 VStack{
                     HStack(spacing: 15){
                         Image(systemName: "person.fill.viewfinder")
                             .foregroundColor(Color("Color 2"))
                         
-                        TextField("Full Name", text: self.$viewModel.name)
+                        TextField("", text: self.$viewModel.name)
+                            .placeholder(when: viewModel.name.isBlank, placeholder: {
+                                Text("Full Name").foregroundColor(.gray)
+                            })
                             .foregroundColor(.white)
+                            .accentColor(.white)
                     }
                     
                     Divider().background(Color.white.opacity(0.5))
@@ -177,8 +183,12 @@ struct SignUP : View {
                         Image(systemName: "person.fill.viewfinder")
                             .foregroundColor(Color("Color 2"))
                         
-                        TextField("Username", text: self.$viewModel.displayName)
+                        TextField("", text: self.$viewModel.displayName)
+                            .placeholder(when: viewModel.displayName.isBlank, placeholder: {
+                                Text("Username").foregroundColor(.gray)
+                            })
                             .foregroundColor(.white)
+                            .accentColor(.white)
                     }
                     
                     Divider().background(Color.white.opacity(0.5))
@@ -191,8 +201,12 @@ struct SignUP : View {
                         Image(systemName: "envelope.fill")
                             .foregroundColor(Color("Color 2"))
                         
-                        TextField("Email Address", text: self.$viewModel.email)
+                        TextField("", text: self.$viewModel.email)
+                            .placeholder(when: viewModel.email.isBlank, placeholder: {
+                                Text("Email Address").foregroundColor(.gray)
+                            })
                             .foregroundColor(.white)
+                            .accentColor(.white)
                     }
                     
                     Divider().background(Color.white.opacity(0.5))
@@ -202,24 +216,41 @@ struct SignUP : View {
                 .padding(.top,20)
                 
                 VStack {
-                    HStack(spacing: 15) {
-                        Image(systemName: "eye.slash.fill")
-                            .foregroundColor(Color("Color 2"))
-                        
-                        SecureField("Password", text: self.$viewModel.password)
-                            .foregroundColor(.white)
+                    if index == 1 {
+                        HStack(spacing: 15) {
+                            Image(systemName: "eye.slash.fill")
+                                .foregroundColor(Color("Color 2"))
+                            
+                            SecureField("", text: self.$viewModel.password)
+                                .placeholder(when: viewModel.password.isBlank, placeholder: {
+                                    Text("Password").foregroundColor(.gray)
+                                })
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                                .disableAutocorrection(true)
+                        }
+                        Divider().background(Color.white.opacity(0.5))
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top,20)
                 
                 VStack {
-                    HStack(spacing: 15) {
-                        Image(systemName: "eye.slash.fill")
-                            .foregroundColor(Color("Color 2"))
-                        
-                        SecureField("Re-enter Password", text: self.$viewModel.Repassword)
-                            .foregroundColor(.white)
+                    if index == 1 {
+                        HStack(spacing: 15) {
+                            
+                            Image(systemName: "eye.slash.fill")
+                                .foregroundColor(Color("Color 2"))
+                            
+                            SecureField("", text: self.$viewModel.Repassword)
+                                .placeholder(when: viewModel.Repassword.isBlank, placeholder: {
+                                    Text("Re-enter Password").foregroundColor(.gray)
+                                })
+                                .foregroundColor(.white)
+                                .accentColor(.white)
+                                .autocorrectionDisabled()
+                        }
+                        Divider().background(Color.white.opacity(0.5))
                     }
                 }
                 
@@ -247,7 +278,7 @@ struct SignUP : View {
             if index == 1 {
                 Button(action: {
                     signUpWithEmailPassword()
-                    viewModel.authenticationState = .authenticated
+                    //viewModel.authenticationState = .authenticated
                 }) {
                     if viewModel.authenticationState != .authenticating {
                         Text("Sign Up")
@@ -277,7 +308,7 @@ struct SignUP : View {
                 if viewModel.authenticationState == .authenticated {
                     
                     
-                    NavigationLink {profilePhotoSelectorView().environmentObject(AuthenticationViewModel())} label: {
+                    NavigationLink {profilePhotoSelectorView(model: viewModel)/*.environmentObject(AuthenticationViewModel())*/} label: {
                         
                         Text("Welcome, click to continue")
                             .foregroundColor(Color("Color 1"))
@@ -318,14 +349,14 @@ struct LoginView : View {
     @State private var email: String = ""
     @State private var showingAlert = true
     //@ObservedObject var viewModel1 = PasswordResetViewModel()
+    @State private var showAlert: Bool = false
     
-    private func signInWithEmailPassword() {
-        Task {
+    private func signInWithEmailPassword() async {
+        
           if await viewModel.signInWithEmailPassword() == true {
               success.toggle()
               dismiss()
           }
-        }
       }
     var body: some View {
         
@@ -354,8 +385,12 @@ struct LoginView : View {
                         Image(systemName: "envelope.fill")
                             .foregroundColor(Color("Color 2"))
                         
-                        TextField("Email", text: $viewModel.email)
+                        TextField("", text: $viewModel.email)
+                            .placeholder(when: viewModel.password.isBlank, placeholder: {
+                                Text("Email").foregroundColor(.gray)
+                            })
                             .foregroundColor(.white)
+                            .accentColor(.white)
                             .textInputAutocapitalization(.never)
                                       .disableAutocorrection(true)
                                       .focused($focus, equals: .email)
@@ -376,13 +411,20 @@ struct LoginView : View {
                         Image(systemName: "eye.slash.fill")
                             .foregroundColor(Color("Color 2"))
                         
-                        SecureField("Password", text: $viewModel.password)
+                        SecureField("", text: $viewModel.password)
+                            .placeholder(when: viewModel.password.isBlank, placeholder: {
+                                Text("Password").foregroundColor(.gray)
+                            })
+                            .foregroundColor(.white)
+                            .accentColor(.white)
+                            .disableAutocorrection(true)
                             .focused($focus, equals: .password)
                                       .submitLabel(.go)
-                                      .onSubmit {
+                                     /* .onSubmit {
                                         signInWithEmailPassword()
-                                      }
+                                      }*/
                     }
+                    Divider().background(Color.white.opacity(0.5))
                 }
                 
                 .padding(.horizontal)
@@ -400,7 +442,7 @@ struct LoginView : View {
 
                 }
                 .padding(.horizontal)
-                .padding(.top,30)
+                //.padding(.top,30)
             }
             .sheet(isPresented: $isShowingPasswordReset){
                 PasswordResetView()
@@ -419,16 +461,19 @@ struct LoginView : View {
             .cornerRadius(35)
             .padding(.horizontal,20)
             
-            
-            if !viewModel.errorMessage.isEmpty {
-                VStack {
-                    Text(viewModel.errorMessage)
-                        .foregroundColor(Color(UIColor.systemRed))
-                }
-            }
             //button
            
-            Button(action: signInWithEmailPassword) {
+            Button(action: {
+                Task{
+                    await signInWithEmailPassword()
+                    
+                    if viewModel.errorMessage != "" {
+                        AppUtility.shared.showCustomAlert(alertType: .none, message: viewModel.errorMessage, actionButtonTitle: nil, cancelButtonTitle: K.appButtonTitle.ok) { action in
+                            
+                        }
+                    }
+                }
+            }, label: {
                 if viewModel.authenticationState != .authenticating {
                     Text("Login")
                         .foregroundColor(Color("Color 1"))
@@ -443,14 +488,24 @@ struct LoginView : View {
                 }
                 else {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .padding(.vertical,8)
+                        .progressViewStyle(CircularProgressViewStyle(tint: .gray))
+                        .accentColor(.gray)
+                        .foregroundColor(.gray)
+                        .padding(.top)
                         .frame(maxWidth: .infinity)
                 }
-            }
+            })
             .offset(y:25)
             
-        
+            .alert(isPresented: $showAlert) {
+                        Alert(
+                            title: Text("Oops"),
+                            message: Text(viewModel.errorMessage),
+                            dismissButton: .default(Text("OK")) {
+                                // Handle the dismiss action if needed
+                            }
+                        )
+                    }
             .disabled(!viewModel.isValid)
             .frame(maxWidth: .infinity)
             
@@ -479,6 +534,20 @@ struct LoginView : View {
                 }
              
             }
+        }
+        
+    }
+    
+}
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
         }
     }
 }

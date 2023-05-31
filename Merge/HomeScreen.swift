@@ -37,17 +37,18 @@ struct HomeScreen: View {
             Divider()
             PostHeader(viewModel: viewModelHome)
     
-            NavigationView {
+            NavigationStack {
                 
                 ScrollViewReader { proxyReader in
                     ScrollView(.vertical, showsIndicators: false, content: {
-                        ForEach(viewModelHome.places) {place in
-                            NavigationLink(destination: {
-                                placeBioView(reviews: ["G"], place: place)}, label: {
-                                    Post(viewModel: viewModelHome, place1: place, viewModel1: postViewModel(place1: place))
-                                
-                                })
-                        }
+                            ForEach(viewModelHome.places) {place in
+                                NavigationLink(destination: {
+                                    placeBioView(reviews: ["G"], place: place)}, label: {
+                                        Post(viewModel: viewModelHome, place1: place, viewModel1: postViewModel(place1: place))
+                                            
+                                        
+                                    })
+                            }
                         .id("SCROLL_TO_TOP")
                         
                     })
@@ -76,7 +77,9 @@ struct HomeScreen: View {
                 
             }
             
-        }.onAppear()
+        }.onChange(of: viewModelHome.city) { newValue in
+            viewModelHome.loadPlaces(location: newValue)
+        }
     }
  
 }
@@ -92,10 +95,10 @@ struct PostHeader: View {
     var body: some View {
         HStack{
             HStack{
-                Image(systemName: "trophy.fill")
+                /*Image(systemName: "trophy.fill")
                     .resizable()
                     .foregroundColor(.yellow)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 20, height: 20)*/
                 
                 Text("Top Trending in \(viewModel.city)")
                     .font(.caption)
@@ -132,7 +135,7 @@ struct Post: View {
     var body: some View {
         VStack{
             Divider()
-            
+                .bold()
             HStack{
                 KFImage(URL(string: viewModel1.place1.imageURL))
                     .resizable()
@@ -171,20 +174,20 @@ struct Post: View {
                              */
                             didLike ? viewModel1.unlike(city: viewModel.city) : viewModel1.like(city: viewModel.city)
                         },label: {
-                            Image(systemName: "flame")
+                            Image(systemName: "arrow.up.square.fill")
                                 .resizable()
                                 .frame(width: 30, height: 30)
-                                .foregroundColor(viewModel1.liked ? .red : .blue)
+                                .foregroundColor(viewModel1.liked ? Color("Color 3") : Color("Color 3"))
                                 .padding(.trailing,20)
                             
                         })
                     }
                 }
             }
-            
-            .padding(.vertical, 1)
-            
         }
+            //.padding(.vertical, 1)
+            
+        
     }
 }
 

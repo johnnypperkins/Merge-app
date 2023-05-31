@@ -114,14 +114,69 @@ class ProfileViewModel: ObservableObject {
     
     func getUserComments() {
         guard let uid = user.id else { return }
-        service.fetchComments(forUid: uid) { comments in
-            self.comments = comments
-            
-            /*for index in 0 ..< comments.count {
-                self.comments[index].uid = self.uid
-            }*/
-        }
+        Firestore.firestore().collection("comments")
+            .whereField("uid", isEqualTo: uid)
+            .order(by: "timestamp", descending: true)
+            .addSnapshotListener { (snapshot, error) in
+                if let error = error {
+                    print("There was an issue retrieving data from Firestore: \(error)")
+                    return
+                }
+                
+                var comments: [Comment] = []
+                
+                if let snapshotDocuments = snapshot?.documents {
+                    for doc in snapshotDocuments {
+                        let data = doc.data()
+                        if let uid = data["uid"] as? String,
+                           let timestamp = data["timestamp"] as? Timestamp,
+                           let text = data["text"] as? String,
+                           let commentLocation = data["commentLocation"] as? String,
+                           let commentImageURL = data["commentImageURL"] as? String {
+                            let newComment = Comment(id: doc.documentID, uid: uid, text: text, commentImageURl: commentImageURL, commentLocation: commentLocation, timestamp: timestamp)
+                            comments.append(newComment)
+                        }
+                    }
+                }
+                
+                self.comments = comments
+                print(comments)
+            }
     }
+
+    func fetchComments(forUid uid: String, completion: @escaping ([Comment]) -> Void) {
+        Firestore.firestore().collection("comments")
+            .whereField("uid", isEqualTo: uid)
+            .order(by: "timestamp", descending: true)
+            .getDocuments { (snapshot, error) in
+                if let error = error {
+                    print("There was an issue retrieving data from Firestore: \(error)")
+                    return
+                }
+                
+                var comments: [Comment] = []
+                
+                if let snapshotDocuments = snapshot?.documents {
+                    for doc in snapshotDocuments {
+                        let data = doc.data()
+                        if let uid = data["uid"] as? String,
+                           let timestamp = data["timestamp"] as? Timestamp,
+                           let text = data["text"] as? String,
+                           let commentLocation = data["commentLocation"] as? String,
+                           let commentImageURL = data["commentImageURL"] as? String {
+                            let newComment = Comment(id: doc.documentID, uid: uid, text: text, commentImageURl: commentImageURL, commentLocation: commentLocation, timestamp: timestamp)
+                            comments.append(newComment)
+                        }
+                    }
+                }
+                
+                completion(comments)
+            }
+    }
+
+
+
+
     
     func getCountOfStringsInArrayField(user1: User) async{
         var count = 0
@@ -153,6 +208,7 @@ class ProfileViewModel: ObservableObject {
     
         private let db = Firestore.firestore()
         private var counterListener: ListenerRegistration?
+        private var listener: ListenerRegistration?
         
         func startListening() {
             let counterRef = db.collection("users").document(user.id!)
@@ -173,6 +229,7 @@ class ProfileViewModel: ObservableObject {
         
         func stopListening() {
             counterListener?.remove()
+            listener?.remove()
         }
     }
   /*  func fetchLikedTweets() {

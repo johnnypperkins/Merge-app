@@ -15,68 +15,94 @@ struct newCommentView: View {
     @State private var selectedImage: UIImage?
     @State private var profileImage: Image?
     @ObservedObject var CommentViewModel = newCommentViewModel()
+   // @ObservedObject var viewModel: placeBioViewModel
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    
     
     var body: some View {
         VStack{
             HStack{
-                Button(action: {/*presentationMode.wrappedValue.dismiss()*/
-                }, label: {
-                    Image(systemName: "xmark")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .clipShape(Circle())
-                        .foregroundColor(.white)
-                        .background(Color("Color 1"))
-                        .foregroundColor(Color(.darkGray))
-                        .scaledToFit()
-                        .shadow(color: Color.black.opacity(0.09), radius: 5, x: 5, y: 5)
+                Button {
+                    // 2
+                    presentationMode.wrappedValue.dismiss()
                     
-                })
-                .background(Color("Color 1"))
-                .clipShape(Circle())
-                .frame(width: 60, height: 60)
-                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 5, y: 5)
+                } label: {
+                    HStack {
+                        Image(systemName: "arrowshape.backward.fill")
+                            .resizable()
+                            .foregroundColor(Color("Color 1"))
+                            .padding(.leading)
+                            .frame(width: 40,height: 17)
+                    }
+                }
                 .animation(.easeInOut, value: 4)
             }
             .frame(maxWidth:.infinity, alignment: .leading)
             .padding(.leading)
             
             
-            Text("Write a review ")
+            Text("Write a comment ")
                 .font(.title)
                 .bold()
                 .padding()
-            TextField("Write a review...", text: $commentBody, axis: .vertical)
-                .textFieldStyle(.roundedBorder)
-                .padding()
+                .foregroundColor(Color("Color 3"))
+            TextField("Comment Anonymously", text: $commentBody, axis: .vertical)
+                        .lineLimit(3, reservesSpace: true)
+                        .textFieldStyle(.roundedBorder)
+                        .padding()
             
             Spacer()
-            
-            Text("Upload a Photo!")
-                .font(.title2)
-                .bold()
-            
-            Button(action: {
-                showImagePicker.toggle()
-            }, label: {
-                if let profileImage = profileImage {
-                    profileImage
-                        .resizable()
-                        .modifier(ProfileImageModifier())
-                }
-                else {
-                    Image(systemName: "photo.circle")
-                        .resizable()
-                        .modifier(ProfileImageModifier())
-                }
-            })
-            .sheet(isPresented: $showImagePicker,
-                   onDismiss: loadImage) {
-                imagePicker(selectedImage: $selectedImage)
+            if selectedImage != nil {
+                Text("Upload a Photo")
+                    .font(.title2)
+                    .bold()
             }
-                   .padding(.bottom,44)
+            if selectedImage != nil {
+                Image(uiImage: selectedImage!)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .cornerRadius(30)
+                    .frame(width: 300, height: 300)
+            } else {
+                /*Image(systemName: "snow")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .clipShape(Circle())
+                    .frame(width: 300, height: 300)*/
+            }
+            HStack{
+                if selectedImage == nil {
+                    Text("Upload a Photo")
+                        .font(.title2)
+                        .bold()
+                        .foregroundColor(Color("Color 3")).padding(.horizontal)
+                }
+                Button("Camera") {
+                    self.sourceType = .camera
+                    self.showImagePicker.toggle()
+                }.foregroundColor(Color("Color 3"))
+                    .fontWeight(.bold)
+                    .padding(.vertical)
+                    .padding(.horizontal)
+                    .background(Color("Color 2")
+                        .clipShape(Capsule())
+                                //shadow
+                        .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
+                
+                Button("photo") {
+                    self.sourceType = .photoLibrary
+                    self.showImagePicker.toggle()
+                }.foregroundColor(Color("Color 3"))
+                    .fontWeight(.bold)
+                    .padding(.vertical)
+                    .padding(.horizontal)
+                    .background(Color("Color 2")
+                        .clipShape(Capsule())
+                                //shadow
+                        .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
+            }
             
-            Spacer()
+            //Spacer()
             
             Button(action: {
                 CommentViewModel.uploadComment(caption: commentBody, commentLocation: location, commentImageURL: selectedImage)
@@ -84,13 +110,16 @@ struct newCommentView: View {
             }, label: {
                 Image(systemName: "paperplane")
                     .resizable()
-                    .foregroundColor(Color(.darkGray))
-                    .scaledToFit()
+                    .foregroundColor(Color("Color 3"))
+                    .frame(width: 40, height: 40)
+                    .padding(.top)
             })
-            Picker(selection: .constant(1)/*@END_MENU_TOKEN@*/, label: /*@START_MENU_TOKEN@*/Text("Picker")) {
-                Text("1").tag(1)
-                Text("2").tag(2)
-            }
+            Spacer()
+            .sheet(isPresented: $showImagePicker,
+                    onDismiss: loadImage) {
+                 imagePicker(selectedImage: $selectedImage, sourceType: self.sourceType)
+             }
+                    .padding(.bottom,44)
         }
         
     }

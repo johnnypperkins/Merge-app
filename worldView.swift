@@ -16,7 +16,7 @@ struct worldView: View {
    
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
 
             ZStack {
                 if isShowing {
@@ -32,7 +32,7 @@ struct worldView: View {
                             Image(systemName: "line.3.horizontal")
                                 .resizable()
                                 .frame(width: 25,height: 25, alignment: .leading)
-                                .foregroundColor(.blue)
+                                .foregroundColor(Color("Color 3"))
                             
                             
                         })
@@ -61,7 +61,7 @@ struct worldView: View {
                                     Image(systemName: "location.magnifyingglass")
                                         .resizable()
                                         .frame(width: 25,height: 25, alignment: .leading)
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(Color("Color 3"))
                                 }
                             }
                         }
@@ -114,19 +114,47 @@ struct TabBar: View {
         VStack(spacing: 0.0) {
             TabView {
                 if let user = authViewModel.currUser {
-                    friendComments()
-                        .tabItem {
-                            Image(systemName: "mappin").padding(.top)
+                    ZStack{
+                        VStack{
+                            friendComments()
+                            
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 10)
+                                .background(Color("Color 3").opacity(0.2))
                         }
-                    HomeScreen(viewModelHome: viewModelHome/*, cityViewModel: viewModel*/)
+                    }
+                    .tabItem {
+                        Image(systemName: "mappin").padding(.top)
+                            .foregroundColor(Color("Color 3"))
+                    }
+                    ZStack{
+                        VStack{
+                            HomeScreen(viewModelHome: viewModelHome/*, cityViewModel: viewModel*/)
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 10)
+                                .background(Color("Color 3").opacity(0.2))
+                        }
+                    }
                         .tabItem {
                             Image(systemName: "globe.europe.africa")
                                 .padding(.top)
+                                .foregroundColor(Color("Color 3"))
                         }
-                    profileView(user: user)
+                    ZStack{
+                        VStack{
+                            profileView(user: user)
+                            Rectangle()
+                                .fill(Color.clear)
+                                .frame(height: 10)
+                                .background(Color("Color 3").opacity(0.2))
+                        }
+                    }
                         .tabItem {
                             Image(systemName: "person.crop.square")
                                 .padding(.top)
+                                .foregroundColor(Color("Color 3"))
                         }
                     
                 } else{
@@ -134,7 +162,6 @@ struct TabBar: View {
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center).ignoresSafeArea(.all)
-            .toolbarColorScheme(.dark, for: .tabBar)
         }.navigationBarBackButtonHidden(true)
         .ignoresSafeArea(.all)
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .center)

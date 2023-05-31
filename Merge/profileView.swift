@@ -21,20 +21,11 @@ struct profileView: View {
     }
     
     var body: some View {
-        NavigationView{
+        NavigationStack{
             VStack{
                 ScrollViewReader { proxyReader in
                     ScrollView {
                         //if let user = authInfo.currUser {
-                        HStack{
-                            Spacer()
-                                .padding(.top,50)
-                            Image(systemName: "ellipsis")
-                                .resizable()
-                                .frame(width: 30,height: 7)
-                                .padding(.horizontal,10)
-                        }
-                        .id("SCROLL_TO_TOP")
                         
                         Text(viewModel.user.fullname)
                             .font(.largeTitle)
@@ -108,6 +99,7 @@ struct profileView: View {
                         
                         NavigationLink(destination: {friendsList(user: viewModel.user)}, label: {
                             Text("\(viewModel.followerCount)")
+                                .foregroundColor(Color("Color 3"))
                         })
                         VStack{
                             Divider()
@@ -119,6 +111,7 @@ struct profileView: View {
                             ForEach(viewModel.comments) { comment in
                                 selfCommentView(comment: comment)
                                     .padding()
+                                
                             }
                         }
                     }
@@ -142,15 +135,15 @@ struct profileView: View {
                         .opacity(-scrollViewOffset >= 0 ? 1 : 0)
                         .animation(.easeInOut, value: 4)
                         ,alignment: .bottomTrailing
-                    )
+                    ).id("SCROLL_TO_TOP")
                 }
-            }
-        }.onAppear {
-            viewModel.startListening()
+            }.navigationBarBackButtonHidden(false)
+       }.onAppear {
+           viewModel.startListening()
         }
         .onDisappear {
             viewModel.stopListening()
-        }
+       }
     }
     }
 
@@ -164,44 +157,84 @@ struct profileView: View {
 struct selfCommentView: View {
     
     var comment: Comment
+    @State private var flagged = false
     
     var body: some View {
         HStack{
-            //Image(image)
-              //  .resizable()
-               // .frame(width: 50,height: 50)
-               // .cornerRadius(50)
             
             VStack{
                 Divider()
-                Text("@" + comment.commentLocation)
-                    .font(.custom("AmericanTypewriter-Semibold", fixedSize: 24))
-                    .fontWeight(.bold)
-                    .frame(alignment: .leading)
-                
-                if comment.commentImageURl != "" {
-                    KFImage(URL(string: comment.commentImageURl))
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: UIScreen.main.bounds.width) // Set frame width to screen width
-                        .clipped()
-                        .cornerRadius(10)
-                }
                 HStack{
-                    Text(comment.text)
-                        .font(.custom("AmericanTypewriter", fixedSize: 20))
-                        .padding(.top, 2)
-                        .frame(alignment: .leading) 
+                    if let timestamp = comment.timestamp.dateValue(), let timeAgo = timeAgo(from: timestamp), let hoursAgo = hoursAgo(from: timestamp) {
+                        if hoursAgo < 24 {
+                            Text("@\(hoursAgo) hours ago" )
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                                .padding(.top, 2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                        }
+                        else {
+                            Text(timeAgo)
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                                .padding(.top, 2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    
+                }.padding(.horizontal)
+                HStack{
+                 Text("@" + comment.commentLocation)
+                 .font(.system(size: 24))
+                 .fontWeight(.bold)
+                 .frame(alignment: .leading)
+                    Spacer()
+                }.padding(.horizontal)
+                    if comment.commentImageURl != "" {
+                        KFImage(URL(string: comment.commentImageURl))
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: UIScreen.main.bounds.width) // Set frame width to screen width
+                            .clipped()
+                            .cornerRadius(10)
+                    }
+                    HStack{
+                        Text(comment.text)
+                            .font(.system(size: 24))
+                            .padding(.top, 2)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }.padding(.horizontal)
                 }
+                .frame(alignment: .leading)
+                
+                
             }
-            .frame(alignment: .leading)
-            
-            
+            //.padding(.horizontal)
+            .padding(.vertical, 1)
         }
-        .padding(.horizontal,5)
-        .padding(.vertical, 1)
+        
+        func timeAgo(from timestamp: Date) -> String? {
+            let calendar = Calendar.current
+            let currentDate = Date()
+            let components = calendar.dateComponents([.day, .hour], from: timestamp, to: currentDate)
+            
+            if let days = components.day, days > 0 {
+                return "\(days) day\(days == 1 ? "" : "s") ago"
+            } else if let hours = components.hour, hours > 0 {
+                return "\(hours) hour\(hours == 1 ? "" : "s") ago"
+            } else {
+                return nil
+            }
+        }
+        func hoursAgo(from timestamp: Date) -> Int? {
+            let calendar = Calendar.current
+            let currentDate = Date()
+            let components = calendar.dateComponents([.hour], from: timestamp, to: currentDate)
+            return components.hour
+        }
+        
     }
-}
-
+    
 
 

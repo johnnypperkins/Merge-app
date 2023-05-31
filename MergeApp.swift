@@ -10,6 +10,7 @@ import FirebaseCore
 import FirebaseFirestore
 import FirebaseAuth
 
+
 @main
 struct MergeApp: App {
     @StateObject private var authViewModel = AuthenticationViewModel()

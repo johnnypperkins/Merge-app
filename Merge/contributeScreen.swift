@@ -19,6 +19,7 @@ struct contributeScreen: View {
     @State private var zRotateAnimation = false
     @Environment(\.dismiss) private var dismiss
     @State private var showingAlert = true
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
         
         var body: some View {
             NavigationView {
@@ -55,7 +56,7 @@ struct contributeScreen: View {
                                 }
                             }
                             .sheet(isPresented: $showImagePicker, onDismiss: loadImage) {
-                                imagePicker(selectedImage: self.$image)
+                                imagePicker(selectedImage: self.$image, sourceType: .photoLibrary)
                             }
     
                         }

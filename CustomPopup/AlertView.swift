@@ -87,7 +87,9 @@ struct CustomAlertView: View {
                         }
                     }
                     ButtonComponent(title: cancelButtonTitle) {
-                        //buttonActionCompletion?(.cancelButton)
+                            buttonActionCompletion?(.cancelButton)
+                        
+                        
                     }
                     Spacer()
                 }

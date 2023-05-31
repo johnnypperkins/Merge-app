@@ -36,15 +36,15 @@ extension AppUtility {
                     .first?.windows
                     .filter({$0.isKeyWindow}).first else {return}
             let alert = CustomAlertView(alertType: alertType, title: title, message: message, isShowCancel: isShowCancel, actionButtonTitle: actionButtonTitle, cancelButtonTitle: cancelButtonTitle, buttonActionCompletion: { action in
-                window.rootViewController?.dismiss(animated: false, completion: {
+                window.rootViewController?.dismiss(animated: true, completion: {
                     buttonActionCompletion?(action)
                 })
             })
             let hostVC = UIHostingController(rootView: alert)
             hostVC.modalPresentationStyle = .overCurrentContext
             hostVC.view.backgroundColor = .clear
-            window.rootViewController?.dismiss(animated: false, completion: nil)
-            window.rootViewController?.present(hostVC, animated: false, completion: nil)
+            window.rootViewController?.dismiss(animated: true, completion: nil)
+            window.rootViewController?.present(hostVC, animated: true, completion: nil)
         }
     }
 }

@@ -13,7 +13,7 @@ import Firebase
 class homeScreenViewModel: ObservableObject {
     @Published var success = false
     let backend = commentService()
-    var places = [Place]()
+    @Published var places = [Place]()
     @Published var city: String
     @Published var queriedCities: [String] = []
     

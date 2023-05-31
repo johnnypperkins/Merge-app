@@ -16,6 +16,7 @@ struct editProfileView: View {
     @State private var selectedImage: UIImage?
     @State private var profileImage: Image?
     @StateObject var viewModelAuth = AuthenticationViewModel()
+    @State private var sourceType: UIImagePickerController.SourceType = .photoLibrary
     
     init(user1: User) {
         user = user1
@@ -57,7 +58,7 @@ struct editProfileView: View {
                     }
                     .sheet(isPresented: $showImagePicker,
                            onDismiss: loadImage) {
-                        imagePicker(selectedImage: $selectedImage)
+                        imagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary)
                     }
                            .padding(.top)
                            .padding(.bottom)

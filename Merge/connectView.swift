@@ -14,67 +14,71 @@ struct connectView: View {
     @State var keyword: String = ""
     @State private var zRotateAnimation = false
     @Environment(\.dismiss) private var dismiss
+    @State var showSheet: Bool = false
     
     var body: some View {
-        let keywordBinding = Binding<String> (
-            get: {
-                keyword
-            },
-            set: {
-                keyword = $0
-                userLookup.fetchUser(from: keyword)
-            }
-        )
-        VStack {
-            HStack {
-                Button {
-                    // 2
-                    dismiss()
-                    
-                } label: {
-                    HStack {
-                        Image(systemName: "arrowshape.backward.fill")
-                            .resizable()
-                            .foregroundColor(Color("Color 1"))
-                            .padding(.leading)
-                            .frame(width: 40,height: 17)
-                    }
+        NavigationStack{
+            let keywordBinding = Binding<String> (
+                get: {
+                    keyword
+                },
+                set: {
+                    keyword = $0
+                    userLookup.fetchUser(from: keyword)
                 }
+            )
+            VStack {
+                HStack {
+                    Button {
+                        // 2
+                        dismiss()
+                        
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrowshape.backward.fill")
+                                .resizable()
+                                .foregroundColor(Color("Color 1"))
+                                .padding(.leading)
+                                .frame(width: 40,height: 17)
+                        }
+                    }
+                    Spacer()
+                }
+                HStack{
+                    
+                }
+                
+                searchBarView(keyword: keywordBinding)
+                
+                ScrollView {
+                    if keyword == "" {
+                        Image("MergeCircle")
+                            .resizable().aspectRatio(contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                            .rotationEffect(.degrees(zRotateAnimation ? 360 : 0))
+                            .animation(Animation.linear(duration: 50).speed(5)
+                                .repeatForever(autoreverses: true),
+                                       value: self.zRotateAnimation)
+                            .padding()// << link to state
+                            .onAppear() {
+                                self.zRotateAnimation.toggle()
+                            }
+                    }
+                    LazyVStack{
+                        ForEach(userLookup.queriedUsers, id: \.id) { user in
+                            NavigationLink(destination: profileView(user: user), label: {
+                                profileBarView(user: user)
+                                
+                            })
+                        }
+                   }
+                }
+                
+                
+                //Spacer()
+                
                 Spacer()
             }
-            HStack{
-                
-            }
-            
-            searchBarView(keyword: keywordBinding)
-            
-            ScrollView {
-                if keyword == "" {
-                    Image("MergeCircle")
-                        .resizable().aspectRatio(contentMode: .fit)
-                        .frame(width: 100, height: 100)
-                        .rotationEffect(.degrees(zRotateAnimation ? 360 : 0))
-                        .animation(Animation.linear(duration: 50).speed(5)
-                            .repeatForever(autoreverses: true),
-                                   value: self.zRotateAnimation)
-                        .padding()// << link to state
-                        .onAppear() {
-                            self.zRotateAnimation.toggle()
-                        }
-                }
-                ForEach(userLookup.queriedUsers, id: \.id) { user in
-                    NavigationLink(destination: {
-                        profileView(user: user)}, label: {
-                            profileBarView(user: user)
-                        
-                    })
-                }
-            }
-            
-            
-            //Spacer()
-            
-            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarBackButtonHidden(true)

@@ -29,6 +29,16 @@ class newCommentViewModel: ObservableObject{
                  }
             }
             }
+        else {
+            self.backend.uploadComment(text: caption, commentImageURL: "", commentLocation: commentLocation) { flip in
+                if flip {
+                    self.success = true
+                }
+                else {
+                    
+                }
+        }
+        }
         
     }
     private func wait() async {

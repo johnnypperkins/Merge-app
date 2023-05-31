@@ -11,6 +11,7 @@ struct imagePicker: UIViewControllerRepresentable {
     
     @Binding var selectedImage: UIImage?
     @Environment(\.presentationMode) var isPresented
+    var sourceType: UIImagePickerController.SourceType
     
     func makeCoordinator() -> Coordinator {
         return Coordinator(self)
@@ -19,6 +20,7 @@ struct imagePicker: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> some UIViewController {
         let picker = UIImagePickerController()
         picker.delegate = context.coordinator
+        picker.sourceType = self.sourceType
         return picker
     }
     
