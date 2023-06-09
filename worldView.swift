@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct worldView: View {
     
@@ -144,6 +145,7 @@ struct TabBar: View {
                         }
                     ZStack{
                         VStack{
+                            //contributeScreen()
                             profileView(user: user)
                             Rectangle()
                                 .fill(Color.clear)

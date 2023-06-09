@@ -133,7 +133,7 @@ class AuthenticationViewModel: ObservableObject {
                     .setData(data) { _ in
                         print("did upload user data")
                     }
-                var user = User(username: displayName.lowercased(), fullname: name, profileImageUrl: "", email: email, college: "")
+                let user = User(username: displayName.lowercased(), fullname: name, profileImageUrl: "", email: email, college: "")
                 try await Firestore.firestore().collection("users").document(authResult.user.uid).updateData(["keywordsForLookup": user.keywordsForLookup])
                 //displayName = user?.email ?? "(unknown)"
                 
@@ -220,18 +220,18 @@ class AuthenticationViewModel: ObservableObject {
                 }
             }
             
-            func stopListening() {
-                userListener?.remove()
-            }
+        func stopListening() {
+            userListener?.remove()
+        }
             
-            func setCurrentUser(user: User?) {
-                currentUser1 = user
-                if user != nil {
-                    startListening()
-                } else {
-                    stopListening()
-                }
+        func setCurrentUser(user: User?) {
+            currentUser1 = user
+            if user != nil {
+                startListening()
+            } else {
+                stopListening()
             }
+        }
         
      
     }

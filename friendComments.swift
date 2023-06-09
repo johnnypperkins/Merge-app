@@ -19,10 +19,10 @@ struct friendComments: View {
     var body: some View {
         
         VStack{
-            
-            Divider()
-            
-            commentHeader()
+//
+//            Divider()
+//
+//            commentHeader()
             Divider()
             if viewmodel.arrrayComments.isEmpty == true{
                 VStack{

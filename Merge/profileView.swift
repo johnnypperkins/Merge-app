@@ -14,6 +14,7 @@ struct profileView: View {
     @State var scrollViewOffset: CGFloat = 0
     //@State private var isShowingEditProfile: Bool = false
     @State private var isProfileEditing = false
+    @Environment(\.dismiss) private var dismiss
     
     init(user: User) {
         viewModel = ProfileViewModel(user: user)
@@ -21,128 +22,149 @@ struct profileView: View {
     }
     
     var body: some View {
-        NavigationStack{
-            VStack{
-                ScrollViewReader { proxyReader in
-                    ScrollView {
-                        //if let user = authInfo.currUser {
-                        
-                        Text(viewModel.user.fullname)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .padding(.bottom,0.5)
-                        Text(viewModel.user.college)
-                        KFImage(URL(string: viewModel.user.profileImageUrl))
-                            .resizable()
-                            .frame(width: 200,height: 200)
-                            .cornerRadius(25)
-                            .padding(.top,25)
-                        if viewModel.user.isCurrentUser == true {
-                            NavigationLink {
-                                editProfileView(user1: viewModel.user)
+        VStack{
+            NavigationStack{
+                VStack{
+                    if viewModel.user.isCurrentUser == false {
+                        HStack {
+                            Button {
+                                // 2
+                                dismiss()
+                                
                             } label: {
-                                Text("Edit")
-                                    .foregroundColor(Color("Color 1"))
-                                    .fontWeight(.bold)
-                                    .padding(.vertical)
-                                    .padding(.horizontal)
-                                    .background(Color("Color 2")
-                                        .clipShape(Capsule())
-                                                //shadow
-                                        .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
-                            }
-
-                        }
-                        else {
-                            Button(action: {
-                                
-                                if viewModel.isFollow == true {
-                                    viewModel.unfollow()
-                                }
-                                else {
-                                    viewModel.follow()
-                                }
-                                
-                            }, label: {
-                                
-                                if viewModel.isFollow == true {
-                                    Text("Unmerge")
+                                HStack {
+                                    Image(systemName: "arrowshape.backward.fill")
+                                        .resizable()
                                         .foregroundColor(Color("Color 1"))
-                                        .fontWeight(.bold)
-                                        .padding(.vertical)
-                                        .padding(.horizontal)
-                                        .background(Color("Color 2")
-                                            .clipShape(Capsule())
-                                                    //shadow
-                                            .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
+                                        .padding(.leading)
+                                        .frame(width: 40,height: 17)
                                 }
-                                else {
-                                    Text("Merge")
-                                        .foregroundColor(Color("Color 1"))
-                                        .fontWeight(.bold)
-                                        .padding(.vertical)
-                                        .padding(.horizontal)
-                                        .background(Color("Color 2")
-                                            .clipShape(Capsule())
-                                                    //shadow
-                                            .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
-                                }
-                            })
-                        }
-                        //.sheet(isPresented: $isShowingEditProfile) {
-                           // editProfileView()
-                        //}
-                        
-                        Text("Connections")
-                            .font(.title)
-                            .fontWeight(.semibold)
-                        
-                        NavigationLink(destination: {friendsList(user: viewModel.user)}, label: {
-                            Text("\(viewModel.followerCount)")
-                                .foregroundColor(Color("Color 3"))
-                        })
-                        VStack{
-                            Divider()
-                            
-                            commentHeader()
-                            
-                        }
-                        VStack{
-                            ForEach(viewModel.comments) { comment in
-                                selfCommentView(comment: comment)
-                                    .padding()
-                                
                             }
-                        }
+                            Spacer()
+                        }.padding()
                     }
-                    .overlay(
-                        Button(action: {
-                            withAnimation(.spring()) {
-                                proxyReader.scrollTo("SCROLL_TO_TOP", anchor: .top)
-                            }
-                        }, label: {
-                            Image(systemName: "arrow.up")
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color("Color 2"))
-                                .clipShape(Circle())
-                                .shadow(color: Color.black.opacity(0.09), radius: 5, x: 5, y: 5)
+                    ScrollViewReader { proxyReader in
+                        ScrollView {
+                            //if let user = authInfo.currUser {
                             
-                        })
-                        .padding(.trailing)
-                        .padding(.bottom)
-                        .opacity(-scrollViewOffset >= 0 ? 1 : 0)
-                        .animation(.easeInOut, value: 4)
-                        ,alignment: .bottomTrailing
-                    ).id("SCROLL_TO_TOP")
-                }
-            }.navigationBarBackButtonHidden(false)
+                            Text(viewModel.user.fullname)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .padding(.bottom,0.5)
+                            Text(viewModel.user.college)
+                            KFImage(URL(string: viewModel.user.profileImageUrl))
+                                .resizable()
+                                .frame(width: 200,height: 200)
+                                .cornerRadius(25)
+                                .padding(.top,25)
+                            if viewModel.user.isCurrentUser == true {
+                                NavigationLink {
+                                    editProfileView(user1: viewModel.user)
+                                } label: {
+                                    Text("Edit")
+                                        .foregroundColor(Color("Color 1"))
+                                        .fontWeight(.bold)
+                                        .padding(.vertical)
+                                        .padding(.horizontal)
+                                        .background(Color("Color 2")
+                                            .clipShape(Capsule())
+                                                    //shadow
+                                            .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
+                                }
+                                
+                            }
+                            else {
+                                Button(action: {
+                                    
+                                    if viewModel.isFollow == true {
+                                        viewModel.unfollow()
+                                    }
+                                    else {
+                                        viewModel.follow()
+                                    }
+                                    
+                                }, label: {
+                                    
+                                    if viewModel.isFollow == true {
+                                        Text("Unmerge")
+                                            .foregroundColor(Color("Color 1"))
+                                            .fontWeight(.bold)
+                                            .padding(.vertical)
+                                            .padding(.horizontal)
+                                            .background(Color("Color 2")
+                                                .clipShape(Capsule())
+                                                        //shadow
+                                                .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
+                                    }
+                                    else {
+                                        Text("Merge")
+                                            .foregroundColor(Color("Color 1"))
+                                            .fontWeight(.bold)
+                                            .padding(.vertical)
+                                            .padding(.horizontal)
+                                            .background(Color("Color 2")
+                                                .clipShape(Capsule())
+                                                        //shadow
+                                                .shadow(color: Color.white.opacity(0.1), radius: 5, x: 0, y: 5))
+                                    }
+                                })
+                            }
+                            //.sheet(isPresented: $isShowingEditProfile) {
+                            // editProfileView()
+                            //}
+                            
+                            Text("Friends")
+                                .font(.title)
+                                .fontWeight(.semibold)
+                            
+                            NavigationLink(destination: {friendsList(user: viewModel.user)}, label: {
+                                Text("\(viewModel.followerCount)")
+                                    .foregroundColor(Color("Color 3"))
+                            })
+                            VStack{
+                                Divider()
+                                
+                                
+                                commentHeader()
+                                
+                            }
+                            VStack{
+                                ForEach(viewModel.comments) { comment in
+                                    selfCommentView(comment: comment)
+                                        .padding()
+                                    
+                                }
+                            }
+                        }
+                        .overlay(
+                            Button(action: {
+                                withAnimation(.spring()) {
+                                    proxyReader.scrollTo("SCROLL_TO_TOP", anchor: .top)
+                                }
+                            }, label: {
+                                Image(systemName: "arrow.up")
+                                    .font(.system(size: 20, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color("Color 2"))
+                                    .clipShape(Circle())
+                                    .shadow(color: Color.black.opacity(0.09), radius: 5, x: 5, y: 5)
+                                
+                            })
+                            .padding(.horizontal)
+                            .padding(.bottom)
+                            .opacity(-scrollViewOffset >= 0 ? 1 : 0)
+                            .animation(.easeInOut, value: 4)
+                            ,alignment: .bottomTrailing
+                        ).id("SCROLL_TO_TOP")
+                    }
+                }.navigationBarBackButtonHidden(false)
+            }
        }.onAppear {
            viewModel.startListening()
         }
         .onDisappear {
-            viewModel.stopListening()
+           viewModel.stopListening()
        }
     }
     }

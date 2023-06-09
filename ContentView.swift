@@ -14,7 +14,7 @@ struct ContentView: View {
     
     var body: some View {
         VStack{
-            if viewModel.authenticationState == .authenticated{
+            if (viewModel.currUser != nil){
                 worldView()
             }
             else {
@@ -51,10 +51,11 @@ struct Home: View {
         GeometryReader{ _ in
             
                 VStack{
+                    Spacer()
                     Image("Logo")
                         .resizable()
                         .frame(width:120 , height: 120)
-                        .padding(.top,70)
+                        .padding()
                     
                     ZStack(alignment: .top){
                         
@@ -386,7 +387,7 @@ struct LoginView : View {
                             .foregroundColor(Color("Color 2"))
                         
                         TextField("", text: $viewModel.email)
-                            .placeholder(when: viewModel.password.isBlank, placeholder: {
+                            .placeholder(when: viewModel.email.isBlank, placeholder: {
                                 Text("Email").foregroundColor(.gray)
                             })
                             .foregroundColor(.white)
@@ -467,7 +468,7 @@ struct LoginView : View {
                 Task{
                     await signInWithEmailPassword()
                     
-                    if viewModel.errorMessage != "" {
+                    if viewModel.errorMessage != "" && viewModel.authenticationState == .unauthenticated {
                         AppUtility.shared.showCustomAlert(alertType: .none, message: viewModel.errorMessage, actionButtonTitle: nil, cancelButtonTitle: K.appButtonTitle.ok) { action in
                             
                         }
